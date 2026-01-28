@@ -10,10 +10,15 @@ if(!apiKey || !apiSecret){
 
 const stramClient = StreamChat.getInstance(apiKey,apiSecret);
 
-export const createStreamUser = async (userData)=>{
+export const upsertUserStream = async (userData)=>{
     try {
-        
+        await stramClient.upsertUsers([userData]);
+        return userData;
     } catch (error) {
-        
+        console.error("Error upserting stream user :",error);
     }
+}
+
+export const generateStramToken = (userId)=>{
+
 }
