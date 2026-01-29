@@ -42,7 +42,7 @@ export async function signup(req, res) {
     });
 
     try {
-      await upsertUserStream({
+      await upsertUserStream({  
         id: newUser._id.toString(),
         name: newUser.fullName,
         image: newUser.profilePic || "",
@@ -109,7 +109,7 @@ export async function logout(req, res) {
   res.clearCookie("jwt");
   res.status(200).json({ success: true, message: "Logout successful" });
 }
-export async function onboard(req,res) {
+export async function onboard(req, res) {
   try {
     const userId = req.user._id;
     const { fullName, bio, nativeLanguage, learningLanguage, location } =
@@ -123,25 +123,41 @@ export async function onboard(req,res) {
     ) {
       return res.status(400).json({
         message: "All fields are require",
-        missingFields:[
-            !fullName && "fullName",
-            !bio && "bio",
-            !nativeLanguage && "nativeLanguage",
-            !learningLanguage && "learningLanguage",
-            !location && "location",
-        ].filter(Boolean)
+        missingFields: [
+          !fullName && "fullName",
+          !bio && "bio",
+          !nativeLanguage && "nativeLanguage",
+          !learningLanguage && "learningLanguage",
+          !location && "location",
+        ].filter(Boolean),
       });
     }
-    const updateUser =await User.findByIdAndUpdate(userId,{
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      {
         ...req.body,
-        isOnboarded:true,
-    },{new:true})
-    if(!updateUser) return res.status(404).json({message:"User not found"});
+        isOnboarded: true,
+      },
+      { new: true },
+    );
 
+    if (!updateUser) return res.status(404).json({ message: "User not found" });
+    try {
+      await upsertUserStream({
+        id: updateUser._id.toString(),
+        name: updateUser.fullName,
+        image: updateUser.profilePic || "",
+      });
+      console.log(
+        `Stream user updated after onboarding for ${updateUser.fullName}`,
+      );
+    } catch (streamError) {
+      console.log("Error updating Stream user during onboarding:",streamError.message)
+    }
 
-    res.status(200).json({success:true,user:updateUser})
+    res.status(200).json({ success: true, user: updateUser });
   } catch (error) {
-    console.error("Onboarding error:",error);
-    return res.status(500).json({message:"Internal server error"});
+    console.error("Onboarding error:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 }

@@ -11,4 +11,8 @@ router.post("/logout",logout);
 
 router.post("/onboarding",ProtectRoute ,onboard);
 
+router.get("/me",ProtectRoute,(req,res)=>{
+    res.status(200).json({success:true,user:req.user});
+})
+
 export default router;
