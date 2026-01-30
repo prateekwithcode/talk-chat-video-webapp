@@ -8,17 +8,23 @@ if(!apiKey || !apiSecret){
     console.error("Stream Api key or secret is missing");
 }
 
-const stramClient = StreamChat.getInstance(apiKey,apiSecret);
+const streamClient = StreamChat.getInstance(apiKey,apiSecret);
 
 export const upsertUserStream = async (userData)=>{
     try {
-        await stramClient.upsertUsers([userData]);
+        await streamClient.upsertUsers([userData]);
         return userData;
     } catch (error) {
         console.error("Error upserting stream user :",error);
     }
 }
 
-export const generateStramToken = (userId)=>{
-
+export const generateStreamToken = (userId)=>{
+    try {
+        // ensure userId is a string
+        const userIdStr = userId.toString();
+        return streamClient.createToken(userIdStr);
+    } catch (error) {
+        console.log("Error generating stream token", error);
+    }
 }
